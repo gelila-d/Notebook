@@ -8,11 +8,6 @@ import { toast } from 'react-hot-toast'
 export default function App() {
   return (
     <div data-theme="cupcake">
-      <button className='btn btn-primary'>click me</button>
-      <button className='btn btn-secondary'>click me</button>
-      <button className='btn btn-accent'>click me</button>
-      <button className='btn btn-ghost'>click me</button>
-      <button className='btn btn-link'>click me</button>
      
       <Routes>
         <Route path="/" element={<HomePage />} />

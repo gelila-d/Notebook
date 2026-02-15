@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import notesRoutes from "./routes/notesRoutes.js"
 import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 5002
 
 app.use(express.json());
 app.use(rateLimiter);
+app.use(cors());
 
 app.use("/api/notes",notesRoutes);
 
