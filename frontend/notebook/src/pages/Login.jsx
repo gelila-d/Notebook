@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,10 +22,11 @@ const Login = () => {
       if (data.success || data.status) {
         navigate("/");
       } else {
-        alert(data.message || 'Login failed');
+        toast.error(data.message || 'Login failed');
       }
     } catch (error) {
       console.error("Login error", error);
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -35,7 +37,7 @@ const Login = () => {
           <h2 className="card-title text-2xl font-bold text-primary flex justify-center mb-4">
             Welcome Back!
           </h2>
-          
+
           <form onSubmit={handleSubmit}>
             {/* Email Field */}
             <div className="form-control w-full">
@@ -82,7 +84,7 @@ const Login = () => {
 
           <p className="text-center text-sm">
             New here?{" "}
-            <span 
+            <span
               className="text-secondary font-bold cursor-pointer hover:underline"
               onClick={() => navigate("/signup")}
             >

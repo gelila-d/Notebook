@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 
 const Signup = () => {
   const [inputValue, setInputValue] = useState({
@@ -27,14 +28,15 @@ const Signup = () => {
         { ...inputValue },
         { withCredentials: true }
       );
-      
+
       if (data.success) {
         navigate("/");
       } else {
-        alert(data.message);
+        toast.error(data.message || "Signup failed");
       }
     } catch (error) {
       console.error("Signup error", error);
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -46,7 +48,7 @@ const Signup = () => {
             Create Account
           </h2>
           <p className="text-center text-sm mb-4 text-base-content/70">Join us today!</p>
-          
+
           <form onSubmit={handleSubmit}>
             {/* Username Field */}
             <div className="form-control w-full">
@@ -107,7 +109,7 @@ const Signup = () => {
           <div className="divider text-xs text-base-content/50 uppercase tracking-widest">Already a member?</div>
 
           <div className="text-center">
-            <button 
+            <button
               className="btn btn-outline btn-secondary btn-sm"
               onClick={() => navigate("/login")}
             >

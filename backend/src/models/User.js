@@ -21,11 +21,13 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.pre("save", async function () {
+userSchema.pre("save", async function (next) {
   // Only hash if the password is new or modified
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 12);
+  next();
 });
+
 
 // Fixed: The line below prevents your OverwriteModelError
 const User = mongoose.models.User || mongoose.model("User", userSchema);

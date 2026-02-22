@@ -2,18 +2,20 @@ import React, { useEffect, useState, useRef } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import api from "../lib/axios";
 import toast from "react-hot-toast";
-import { ArrowLeft, Loader, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader, Trash2, AlertTriangle } from "lucide-react";
 
 const NoteDetailPage = () => {
   const [note, setNote] = useState({ title: "", content: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // Ref to track if toast has already been shown
-  const toastShownRef = useRef(false);
+  // Separate refs so fetch error and save success don't interfere
+  const fetchToastShownRef = useRef(false);
 
   // Fetch note
   useEffect(() => {
@@ -23,9 +25,10 @@ const NoteDetailPage = () => {
         setNote(res.data);
       } catch (error) {
         console.error("Error fetching note", error);
-        if (!toastShownRef.current) {
+        // 401 is handled globally by axios interceptor
+        if (error.response?.status !== 401 && !fetchToastShownRef.current) {
           toast.error("Failed to fetch the note");
-          toastShownRef.current = true;
+          fetchToastShownRef.current = true;
         }
       } finally {
         setLoading(false);
@@ -34,24 +37,29 @@ const NoteDetailPage = () => {
     fetchNote();
   }, [id]);
 
-  // Delete note
+  // Delete note (called after modal confirmation)
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to delete this note?")) return;
-
+    setDeleting(true);
     try {
       await api.delete(`/notes/${id}`);
       toast.success("Note deleted");
       navigate("/");
     } catch (error) {
       console.error("Error deleting note", error);
-      toast.error("Failed to delete note");
+      // 401 handled globally; show error for other failures
+      if (error.response?.status !== 401) {
+        toast.error("Failed to delete note");
+      }
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
     }
   };
 
   // Save note
   const handleSave = async () => {
     if (!note.title.trim() || !note.content.trim()) {
-      toast.error("Please add a title or content");
+      toast.error("Please add a title and content");
       return;
     }
 
@@ -59,17 +67,14 @@ const NoteDetailPage = () => {
 
     try {
       await api.put(`/notes/${id}`, note);
-
-      // Show toast only once
-      if (!toastShownRef.current) {
-        toast.success("Note updated successfully");
-        toastShownRef.current = true;
-      }
-
+      toast.success("Note updated successfully");
       navigate("/");
     } catch (error) {
       console.error("Error updating note", error);
-      toast.error("Failed to update note");
+      // 401 handled globally; show error for other failures
+      if (error.response?.status !== 401) {
+        toast.error("Failed to update note");
+      }
     } finally {
       setSaving(false);
     }
@@ -93,7 +98,7 @@ const NoteDetailPage = () => {
             Back
           </Link>
           <button
-            onClick={handleDelete}
+            onClick={() => setShowDeleteModal(true)}
             className="btn btn-error btn-outline flex items-center gap-2"
           >
             <Trash2 className="w-5 h-5" />
@@ -139,12 +144,64 @@ const NoteDetailPage = () => {
                 onClick={handleSave}
                 disabled={saving}
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? (
+                  <>
+                    <Loader className="animate-spin w-4 h-4 mr-1" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Styled Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="bg-error/10 p-4 rounded-full">
+                <AlertTriangle className="w-10 h-10 text-error" />
+              </div>
+              <h3 className="font-bold text-lg">Delete Note?</h3>
+              <p className="text-base-content/70 text-sm">
+                This action cannot be undone. The note will be permanently
+                removed.
+              </p>
+            </div>
+            <div className="modal-action justify-center gap-3 mt-6">
+              <button
+                className="btn btn-ghost btn-sm px-6"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-error btn-sm px-6"
+                onClick={handleDelete}
+                disabled={deleting}
+              >
+                {deleting ? (
+                  <>
+                    <Loader className="animate-spin w-4 h-4 mr-1" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Yes, Delete"
+                )}
+              </button>
+            </div>
+          </div>
+          <div
+            className="modal-backdrop bg-black/40"
+            onClick={() => !deleting && setShowDeleteModal(false)}
+          />
+        </div>
+      )}
     </div>
   );
 };
