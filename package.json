@@ -1,0 +1,22 @@
+{
+  "name": "notebook",
+  "version": "1.0.0",
+  "description": "A **multi-user online notebook** where users can **create, view, and manage their own notes**. Built with **MERN (MongoDB, Express, React, Node.js)** and secured with **JWT authentication**. Each user has a private workspace, so notes are never shared across accounts.",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix backend && npm install --prefix frontend/notebook && npm run build --prefix frontend/notebook",
+    "start": "npm run start --prefix backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gelila-d/Notebook.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/gelila-d/Notebook/issues"
+  },
+  "homepage": "https://github.com/gelila-d/Notebook#readme"
+}

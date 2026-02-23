@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import rateLimiter from "./middleware/rateLimiter.js";
 import authRoute from "./routes/AuthRoute.js";
 import cookieParser from "cookie-parser";
+import path from "path";
 
 dotenv.config();
 const app = express();
@@ -17,16 +18,24 @@ app.use(cookieParser());
 app.use(rateLimiter);
 
 // CORS
+if(process.env.NODE_ENV !== "production"){
 app.use(cors({
     origin: "http://localhost:5173", // Simplified for local dev
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
 }));
+}
+
 
 // ROUTES
 app.use("/api/notes", notesRoutes);
 app.use("/", authRoute); // This maps POST http://localhost:5002/
-
+if(process.env.NODE_ENV === "production"){
+    app.use(express.static(path.join(__dirname, "../frontend/notebook/dist")));
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/notebook/dist/index.html"));
+});
+}
 // DATABASE & START
 connectDB().then(() => {
     app.listen(PORT, () => {
