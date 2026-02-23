@@ -39,13 +39,12 @@ app.use("/", authRoute);
 
 // Serve frontend in production
 if (process.env.NODE_ENV === "production") {
-  const frontendDistPath = path.join(__dirname, "../frontend/notebook/dist");
+  const frontendDistPath = path.join(__dirname, "../../frontend/notebook/dist");
   app.use(express.static(frontendDistPath));
   app.get("*", (req, res) => {
     res.sendFile(path.join(frontendDistPath, "index.html"));
   });
 }
-
 // DATABASE & START
 connectDB().then(() => {
   app.listen(PORT, () => {
